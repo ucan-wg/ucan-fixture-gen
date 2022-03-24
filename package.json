@@ -1,0 +1,19 @@
+{
+  "name": "ucan-fixture-gen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "gen": "tsc && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.4.3",
+    "ucans": "https://github.com/ucan-wg/ts-ucan#e10bdeca26e663df72e4266ccd9d47f8ce100665",
+    "uint8arrays": "^3.0.0",
+    "moment": "2.29.1"
+  }
+}
