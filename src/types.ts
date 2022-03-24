@@ -1,44 +1,41 @@
-import { EdKeypair } from "ucans"
+import { EdKeypair } from "ucans";
 
 type Header = {
-  alg?: any,
-  typ?: any,
-  ucv?: any
-}
+  alg?: any;
+  typ?: any;
+  ucv?: any;
+};
 
 type Payload = {
-  iss?: any,
-  aud?: any,
-  nbf?: any,
-  exp?: any,
-  nnc?: any,
-  fct?: any,
-  att?: any,
-  prf?: any,
-}
+  iss?: any;
+  aud?: any;
+  nbf?: any;
+  exp?: any;
+  nnc?: any;
+  fct?: any;
+  att?: any;
+  prf?: any;
+};
 
 type Fixture = {
-  comment: string,
-  token: string,
+  comment: string;
+  token: string;
   assertions: {
-    header?: Header,
-    payload?: Payload,
-    validationErrors?: ValidationError[],
-    typeErrors?: TypeError[],
-  }
-}
+    header?: Header;
+    payload?: Payload;
+    validationErrors?: ValidationError[];
+    typeErrors?: TypeError[];
+  };
+};
 
 type Witness = {
-  issuerKp: EdKeypair,
-  token: string,
-  header?: Header,
-  payload?: Payload,
-}
+  issuerKp: EdKeypair;
+  token: string;
+  header?: Header;
+  payload?: Payload;
+};
 
-type Part =
-  | "header"
-  | "payload"
-  | "signature"
+type Part = "header" | "payload" | "signature";
 
 type TypeError =
   | "algWrongType"
@@ -59,7 +56,7 @@ type TypeError =
   | "audMissing"
   | "expMissing"
   | "attMissing"
-  | "prfMissing"
+  | "prfMissing";
 
 type ValidationError =
   | "base64Invalid"
@@ -76,7 +73,8 @@ type ValidationError =
   | "expWitnessTimeBoundExceeded"
   | "attInvalidResource"
   | "attInvalidAbility"
-
+  | "prfWitnessNotAligned"
+  | "prfWitnessVersionMismatch";
 
 export type {
   Header,
@@ -85,5 +83,5 @@ export type {
   TypeError,
   ValidationError,
   Fixture,
-  Witness
-}
+  Witness,
+};

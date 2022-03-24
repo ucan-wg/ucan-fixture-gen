@@ -10,7 +10,5 @@
     "declarationDir": "dist",
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }
