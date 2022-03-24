@@ -199,28 +199,10 @@ const generateInvalidSamplesMain = async () => {
   });
 
   await generateSpecFixture({
-    comment: "Payload `nbf` field should be a number",
-    issuerKp,
-    audience,
-    payload: { nbf: "string" },
-    typeErrors: ["nbfWrongType"],
-  });
-
-  await generateSpecFixture({
     comment: "UCAN audience did:key is not valid",
     issuerKp,
     audience,
     payload: { aud: "" },
-    validationErrors: ["audInvalidDidKey"],
-  });
-
-  await generateSpecFixture({
-    comment: "UCAN audience did:key is not valid",
-    issuerKp,
-    audience,
-    payload: {
-      aud: "did:key:zM++m8DxWSwQhhZYbgPjkCNjmLvva3D7qBsGPvwz2gynSiaJ",
-    },
     validationErrors: ["audInvalidDidKey"],
   });
 
@@ -311,7 +293,7 @@ const generateInvalidSamplesMain = async () => {
     payload: {
       att: [
         {
-          with: "tamedun.fission.name/public/photos/",
+          with: "tamedun.fission.app/public/photos/",
           can: "wnfs/APPEND",
         },
       ],
@@ -326,7 +308,7 @@ const generateInvalidSamplesMain = async () => {
     payload: {
       att: [
         {
-          with: "wnfs://tamedun.fission.name/public/photos/",
+          with: "wnfs://tamedun.fission.app/public/photos/",
           can: "APPEND",
         },
       ],
@@ -361,7 +343,7 @@ const generateInvalidSamplesTimeBound = async () => {
     const witness = await generateWitness({ audience: issuerKp.did() });
 
     await generateSpecFixture({
-      comment: "Witnesses expire before the delegated",
+      comment: "Witnesses expire before the delegated UCAN",
       issuerKp,
       audience,
       payload: {
@@ -384,7 +366,7 @@ const generateInvalidSamplesTimeBound = async () => {
     });
 
     await generateSpecFixture({
-      comment: "Witnesses are not ready to be used before the delegated",
+      comment: "Witnesses are not ready to be used before the delegated UCAN",
       issuerKp,
       audience,
       payload: {
@@ -437,7 +419,7 @@ const generateInvalidSamplesAlignment = async () => {
   }
 };
 
-const generateInvalidSamplesDelegation = async () => {
+const generateInvalidSamplesRedelegation = async () => {
   const { issuerKp, audience } = await setKeypairs();
 
   {
@@ -449,18 +431,20 @@ const generateInvalidSamplesDelegation = async () => {
     });
 
     await generateSpecFixture({
-      comment: "Capability has not been delegated",
+      comment: "Witness does not exist",
       issuerKp,
       audience,
       payload: {
         exp,
         prf: [witness.token],
-        att: {
-          with: "prf/0",
-          can: "ucan/DELEGATE",
-        },
+        att: [
+          {
+            with: "prf/2",
+            can: "ucan/DELEGATE",
+          },
+        ],
       },
-      validationErrors: ["prfWitnessNotAligned"],
+      validationErrors: ["prfWitnessDoesNotExist"],
     });
   }
 };
@@ -468,21 +452,360 @@ const generateInvalidSamplesDelegation = async () => {
 const generateValidSamplesMain = async () => {
   const { issuerKp, audience } = await setKeypairs();
 
-  // TODO: add more valid samples
+  await generateSpecFixture({
+    comment: "UCAN version is valid",
+    issuerKp,
+    audience,
+    header: { ucv: "0.8.1" },
+  });
+
+  await generateSpecFixture({
+    comment: "Payload `nbf` is valid",
+    issuerKp,
+    audience,
+    payload: { nbf: moment().subtract(1, "day").unix() },
+  });
+
+  await generateSpecFixture({
+    comment: "Payload `exp` is valid",
+    issuerKp,
+    audience,
+    payload: { exp: moment().add(100, "years").unix() },
+  });
+
+  await generateSpecFixture({
+    comment: "Payload `fct` is valid",
+    issuerKp,
+    audience,
+    payload: {
+      fct: [
+        {
+          challenge: "abcdef",
+          from: "example.com",
+        },
+      ],
+    },
+  });
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness1 = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        exp,
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/READ",
+          },
+        ],
+      },
+    });
+
+    const witness2 = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        exp,
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/WRITE",
+          },
+        ],
+      },
+    });
+
+    await generateSpecFixture({
+      comment: "Delegated UCAN can have multiple valid proofs",
+      issuerKp,
+      audience,
+      payload: {
+        exp,
+        prf: [witness1.token, witness2.token],
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/WRITE",
+          },
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/READ",
+          },
+        ],
+      },
+    });
+  }
+
+  await generateSpecFixture({
+    comment: "UCAN attenuation is valid syntax",
+    issuerKp,
+    audience,
+    payload: {
+      att: [
+        {
+          with: "wnfs://tamedun.fission.app/public/photos/",
+          can: "wnfs/APPEND",
+        },
+      ],
+    },
+  });
+
+  await generateSpecFixture({
+    comment: "UCAN attenuation is valid with multiple capabilities",
+    issuerKp,
+    audience,
+    payload: {
+      att: [
+        {
+          with: "db://tamedun.fission.app/users",
+          can: "db/WRITE",
+        },
+        {
+          with: "db://tamedun.fission.app/users",
+          can: "db/READ",
+        },
+      ],
+    },
+  });
 };
 
 const generateValidSamplesTimeBound = async () => {
   const { issuerKp, audience } = await setKeypairs();
 
-  // TODO: add more valid samples
+  await generateSpecFixture({
+    comment: "UCAN has not expired",
+    issuerKp,
+    audience,
+  });
+
+  await generateSpecFixture({
+    comment: "UCAN is ready to be used",
+    issuerKp,
+    audience,
+    payload: {
+      nbf: moment().subtract(1, "day").unix(),
+      exp: moment().add(101, "years").unix(),
+    },
+  });
+
+  {
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        exp: moment().add(120, "years").unix(),
+      },
+    });
+
+    await generateSpecFixture({
+      comment: "Witnesses expire after the delegated UCAN",
+      issuerKp,
+      audience,
+      payload: {
+        exp: moment().add(100, "years").unix(),
+        prf: [witness.token],
+      },
+    });
+  }
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: { exp },
+    });
+
+    await generateSpecFixture({
+      comment: "Witnesses expire at the same time as delegated UCAN",
+      issuerKp,
+      audience,
+      payload: {
+        nbf: moment().unix(),
+        exp,
+        prf: [witness.token],
+      },
+    });
+  }
+
+  {
+    const exp = moment().add(120, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        nbf: moment().add(100, "years").unix(),
+        exp,
+      },
+    });
+
+    await generateSpecFixture({
+      comment: "Witnesses are ready to be used before the delegated UCAN",
+      issuerKp,
+      audience,
+      payload: {
+        nbf: moment().add(101, "years").unix(),
+        exp,
+        prf: [witness.token],
+      },
+    });
+  }
+
+  {
+    const nbf = moment().add(100, "years").unix();
+    const exp = moment().add(120, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: { nbf, exp },
+    });
+
+    await generateSpecFixture({
+      comment:
+        "Witness is ready to be used at the same time as the delegated UCAN",
+      issuerKp,
+      audience,
+      payload: {
+        nbf,
+        exp,
+        prf: [witness.token],
+      },
+    });
+  }
+};
+
+const generateValidSamplesAlignment = async () => {
+  const { issuerKp, audience } = await setKeypairs();
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: { exp },
+    });
+
+    await generateSpecFixture({
+      comment: "Witness issuer audience did aligns with delegated issuer did",
+      issuerKp,
+      audience,
+      payload: { exp, prf: [witness.token] },
+    });
+  }
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: { exp },
+    });
+
+    await generateSpecFixture({
+      comment: "Witness UCAN version matches delegated UCAN version",
+      issuerKp,
+      audience,
+      payload: { exp, prf: [witness.token] },
+    });
+  }
+};
+
+const generateValidSampleRedelegation = async () => {
+  const { issuerKp, audience } = await setKeypairs();
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness = await generateWitness({
+      audience: issuerKp.did(),
+      payload: { exp },
+    });
+
+    await generateSpecFixture({
+      comment: "Delegated UCAN can delegate",
+      issuerKp,
+      audience,
+      payload: {
+        exp,
+        prf: [witness.token],
+        att: [
+          {
+            with: "prf/0",
+            can: "ucan/DELEGATE",
+          },
+        ],
+      },
+    });
+  }
+};
+
+const generateValidSampleRightsAmplification = async () => {
+  const { issuerKp, audience } = await setKeypairs();
+
+  {
+    const exp = moment().add(100, "years").unix();
+
+    const witness1 = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        exp,
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/READ",
+          },
+        ],
+      },
+    });
+
+    const witness2 = await generateWitness({
+      audience: issuerKp.did(),
+      payload: {
+        exp,
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/WRITE",
+          },
+        ],
+      },
+    });
+
+    await generateSpecFixture({
+      comment:
+        "Delegated UCAN has rights amplification from combining witness capabilities",
+      issuerKp,
+      audience,
+      payload: {
+        exp,
+        prf: [witness1.token, witness2.token],
+        att: [
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/WRITE",
+          },
+          {
+            with: "db://tamedun.fission.app/users",
+            can: "db/READ",
+          },
+        ],
+      },
+    });
+  }
+
+  // TODO: Nested rights amplification
 };
 
 export {
   generateInvalidSamplesBase64,
+  generateInvalidSamplesMissingParts,
   generateInvalidSamplesMain,
   generateInvalidSamplesTimeBound,
   generateInvalidSamplesAlignment,
-  generateInvalidSamplesDelegation,
+  generateInvalidSamplesRedelegation,
   generateValidSamplesMain,
   generateValidSamplesTimeBound,
+  generateValidSamplesAlignment,
+  generateValidSampleRedelegation,
+  generateValidSampleRightsAmplification,
 };

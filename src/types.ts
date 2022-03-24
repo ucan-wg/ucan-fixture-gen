@@ -74,7 +74,8 @@ type ValidationError =
   | "attInvalidResource"
   | "attInvalidAbility"
   | "prfWitnessNotAligned"
-  | "prfWitnessVersionMismatch";
+  | "prfWitnessVersionMismatch"
+  | "prfWitnessDoesNotExist";
 
 export type {
   Header,

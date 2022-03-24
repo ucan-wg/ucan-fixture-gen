@@ -1,4 +1,4 @@
-## Ucan Fixture Generator
+## UCAN Fixture Generator
 
 This utility is used to generate fixtures for the UCAN v0.8 specification.
 
@@ -13,5 +13,9 @@ yarn install
 Generate fixtures:
 
 ```bash
-yarn gen
+yarn gen -- valid
+```
+
+```bash
+yarn gen -- invalid
 ```
