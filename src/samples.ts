@@ -39,26 +39,26 @@ const generateInvalidSamplesMissingParts = async () => {
   const { issuerKp, audience } = await setKeypairs();
 
   await generateSpecFixture({
-    comment: "UCAN header section is missing or invalid",
+    comment: "UCAN header section is malformed",
     issuerKp,
     audience,
-    validationErrors: ["headerMissingOrInvalid"],
+    validationErrors: ["headerMalformed"],
     missingPart: "header",
   });
 
   await generateSpecFixture({
-    comment: "UCAN payload section is missing or invalid",
+    comment: "UCAN payload section is malformed",
     issuerKp,
     audience,
-    validationErrors: ["payloadMissingOrInvalid"],
+    validationErrors: ["payloadMalformed"],
     missingPart: "payload",
   });
 
   await generateSpecFixture({
-    comment: "UCAN signature is missing or invalid",
+    comment: "UCAN signature is malformed",
     issuerKp,
     audience,
-    validationErrors: ["signatureMissingOrInvalid"],
+    validationErrors: ["signatureMalformed"],
     missingPart: "signature",
   });
 };
@@ -215,7 +215,7 @@ const generateInvalidSamplesMain = async () => {
   });
 
   await generateSpecFixture({
-    comment: "Payload `exp` field should be a did:key string",
+    comment: "Payload `exp` field should be a string",
     issuerKp,
     audience,
     payload: { exp: "string" },
@@ -247,7 +247,7 @@ const generateInvalidSamplesMain = async () => {
   });
 
   await generateSpecFixture({
-    comment: "Payload `prf` field should be an array of string",
+    comment: "Payload `prf` field should be an array of strings",
     issuerKp,
     audience,
     payload: { prf: 1 },
@@ -255,7 +255,7 @@ const generateInvalidSamplesMain = async () => {
   });
 
   await generateSpecFixture({
-    comment: "Payload `prf` field should be an array of string",
+    comment: "Payload `prf` field should be an array of strings",
     issuerKp,
     audience,
     payload: { prf: [1] },
@@ -347,7 +347,7 @@ const generateInvalidSamplesTimeBound = async () => {
       issuerKp,
       audience,
       payload: {
-        exp: moment().add(120, "years").unix(),
+        exp: moment().add(200, "years").unix(),
         prf: [witness.token],
       },
       validationErrors: ["expWitnessTimeBoundExceeded"],
@@ -392,7 +392,7 @@ const generateInvalidSamplesAlignment = async () => {
 
     await generateSpecFixture({
       comment:
-        "Witness issuer audience did does not align with delegated issuer did",
+        "Witness issuer audience DID does not align with delegated issuer DID",
       issuerKp,
       audience,
       payload: { exp, prf: [witness.token] },
@@ -431,7 +431,7 @@ const generateInvalidSamplesRedelegation = async () => {
     });
 
     await generateSpecFixture({
-      comment: "Witness does not exist",
+      comment: "Witness referenced in prf scheme does not exist",
       issuerKp,
       audience,
       payload: {
@@ -453,24 +453,9 @@ const generateValidSamplesMain = async () => {
   const { issuerKp, audience } = await setKeypairs();
 
   await generateSpecFixture({
-    comment: "UCAN version is valid",
+    comment: "UCAN is valid",
     issuerKp,
     audience,
-    header: { ucv: "0.8.1" },
-  });
-
-  await generateSpecFixture({
-    comment: "Payload `nbf` is valid",
-    issuerKp,
-    audience,
-    payload: { nbf: moment().subtract(1, "day").unix() },
-  });
-
-  await generateSpecFixture({
-    comment: "Payload `exp` is valid",
-    issuerKp,
-    audience,
-    payload: { exp: moment().add(100, "years").unix() },
   });
 
   await generateSpecFixture({
@@ -517,7 +502,7 @@ const generateValidSamplesMain = async () => {
     });
 
     await generateSpecFixture({
-      comment: "Delegated UCAN can have multiple valid proofs",
+      comment: "Delegated UCAN is valid with multiple valid proofs",
       issuerKp,
       audience,
       payload: {
@@ -538,7 +523,7 @@ const generateValidSamplesMain = async () => {
   }
 
   await generateSpecFixture({
-    comment: "UCAN attenuation is valid syntax",
+    comment: "UCAN attenuation has valid syntax",
     issuerKp,
     audience,
     payload: {

@@ -15,7 +15,7 @@ import {
 const defaultHeader: Header = {
   alg: "EdDSA",
   typ: "JWT",
-  ucv: "0.8",
+  ucv: "0.8.1",
 };
 
 /** Converts a UCAN header or payload to url-safe base64 */

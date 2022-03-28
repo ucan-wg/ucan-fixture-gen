@@ -60,9 +60,9 @@ type TypeError =
 
 type ValidationError =
   | "base64Invalid"
-  | "headerMissingOrInvalid"
-  | "payloadMissingOrInvalid"
-  | "signatureMissingOrInvalid"
+  | "headerMalformed"
+  | "payloadMalformed"
+  | "signatureMalformed"
   | "algInvalidAlgorithm"
   | "typInvalidType"
   | "ucvInvalidVersion"
