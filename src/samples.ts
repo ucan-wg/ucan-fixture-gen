@@ -3,7 +3,7 @@ import {
   generateSpecFixture,
   generateWitness,
 } from "./generator";
-import { EdKeypair, validate } from "ucans";
+import { EdKeypair } from "ucans";
 import moment from "moment";
 import { Fixture } from "./types";
 
@@ -439,7 +439,7 @@ const generateInvalidSamplesRedelegation = async () => {
         prf: [witness.token],
         att: [
           {
-            with: "prf/2",
+            with: "prf:2",
             can: "ucan/DELEGATE",
           },
         ],
@@ -715,7 +715,7 @@ const generateValidSampleRedelegation = async () => {
         prf: [witness.token],
         att: [
           {
-            with: "prf/0",
+            with: "prf:0",
             can: "ucan/DELEGATE",
           },
         ],
